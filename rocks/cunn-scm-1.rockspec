@@ -2,7 +2,7 @@ package = "cunn"
 version = "scm-1"
 
 source = {
-   url = "git://github.com/torch/cunn.git",
+   url = "git://github.com/danielsig727/cunn.git",
 }
 
 description = {
