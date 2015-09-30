@@ -142,7 +142,9 @@ static int cunn_VolumetricMaxPooling_updateOutput(lua_State *L) {
 
   THAssert(THCudaTensor_checkGPU(state, 3, input, indices, output));
 
+  int batch = 1;
   if (THCudaTensor_nDimension(state, input) == 4) {
+    batch = 0;
     luaL_argcheck(L,
                   THCudaTensor_size(state, input, 1) >= kT &&
                   THCudaTensor_size(state, input, 2) >= kH &&
@@ -174,7 +176,7 @@ static int cunn_VolumetricMaxPooling_updateOutput(lua_State *L) {
   int outputHeight = (inputHeight - kH) / dH + 1;
   int outputWidth  = (inputWidth  - kW) / dW + 1;
 
-  if (input->nDimension == 4) { /* 4D */
+  if (batch == 0) { /* 4D */
     /* resize output */
     THCudaTensor_resize4d(state, output, inputSlices,
                           outputTime, outputHeight, outputWidth);
@@ -195,7 +197,7 @@ static int cunn_VolumetricMaxPooling_updateOutput(lua_State *L) {
   // Collapse batch and feature dimensions
   THCDeviceTensor<float, 4> cudaInput;
   THCDeviceTensor<float, 4> cudaOutput;
-  if (THCudaTensor_nDimension(state, input) == 4) {
+  if (batch == 0) {
     cudaInput  = toDeviceTensor<float, 4>(state, input);
     cudaOutput = toDeviceTensor<float, 4>(state, output);
   } else {
@@ -294,7 +296,9 @@ static int cunn_VolumetricMaxPooling_updateGradInput(lua_State *L) {
 
   THAssert(THCudaTensor_checkGPU(state, 4, input, indices, gradOutput, gradInput));
 
+  int batch = 1;
   if (THCudaTensor_nDimension(state, input) == 4) { /* 4D */
+    batch = 0;
     batchSize = 1;
     inputSlices  = THCudaTensor_size(state, input, 0);
 
@@ -315,7 +319,7 @@ static int cunn_VolumetricMaxPooling_updateGradInput(lua_State *L) {
   // Collapse batch and feature dimensions
   THCDeviceTensor<float, 4> cudaGradInput;
   THCDeviceTensor<float, 4> cudaGradOutput;
-  if (THCudaTensor_nDimension(state, input) == 4) {
+  if (batch == 0) {
     cudaGradInput  = toDeviceTensor<float, 4>(state, gradInput);
     cudaGradOutput = toDeviceTensor<float, 4>(state, gradOutput);
   } else {
